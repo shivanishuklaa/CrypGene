@@ -1,0 +1,11 @@
+streamlit
+langchain
+langchain-google-genai
+pycoingecko
+google-generativeai
+python-dotenv
+pandas
+SpeechRecognition 
+gTTS 
+pyaudio
+plotly
