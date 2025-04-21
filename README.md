@@ -9,7 +9,7 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
 - **Real-time Market Data**: Access up-to-date information on cryptocurrency prices, market caps, trading volumes, and trends
 - **Trending Coins Tracker**: Monitor the top trending cryptocurrencies in a convenient sidebar display
 - **Price Charts**: Visualize cryptocurrency price movements with interactive 7-day price charts
-- **Voice Interaction**: Use speech recognition to talk with CrypGene and hear responses through text-to-speech
+- **Text-to-Speech**: Listen to CrypGene's responses through audio playback
 - **Chat Management**: Easily start new conversations or clear chat history with intuitive controls
 
 ## 🔧 Requirements
@@ -23,7 +23,7 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
 1. Clone this repository:
    ```
    git clone <repository-url>
-   cd cryptogene
+   cd crypgene
    ```
 
 2. Install the required dependencies:
@@ -32,8 +32,7 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
    ```
 
 3. Set up your API keys:
-   - Make file `.env` for storing API key
-   - Add your Google API key to the `.env` file
+   - update new key     ```
 
 4. Run the application:
    ```
@@ -44,27 +43,31 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
 
 ### Left Sidebar
 - **New Chat**: Start a fresh conversation with CrypGene
-- **Clear History**: Remove all previous messages
+- **Save Chat**: Save your current conversation to history
 - **Trending Coins**: View the latest trending cryptocurrencies at a glance
-- **Chat History**: Access your previous conversations with CrypGene
+- **Chat History**: Access, load, or delete your previous conversations with CrypGene
 
 ### Market Overview Tab
 - Browse real-time data on the top 50 cryptocurrencies by market cap
 - View global market statistics including total market cap and 24h trading volume
-- Click on any cryptocurrency to see detailed information and price charts
+- Click on any cryptocurrency to see detailed information and 7-day price charts
 
 ### AI Advisor Tab
 - Ask CrypGene questions about cryptocurrency investments, such as:
    - "Should I invest in Bitcoin right now?"
    - "What's the current price of Ethereum?"
    - "Can you explain blockchain technology in simple terms?"
-   - "What are the most promising altcoins to watch in 2023?"
+   - "What are the most promising altcoins to watch in 2024?"
    - "How should I diversify my crypto portfolio?"
    - "What factors are affecting the crypto market today?"
+- Get spoken responses through text-to-speech (with option to stop audio)
 
-### Voice Interaction
-- Use the microphone button to speak your questions
-- Listen to CrypGene's responses through text-to-speech
+## 🛠️ Technical Details
+
+- **Google Gemini Model**: Utilizes Google's advanced Gemini 2.0 Flash model for natural language understanding and generation
+- **CoinGecko API**: Sources real-time and historical cryptocurrency data
+- **Streamlit Framework**: Powers the interactive web interface
+- **Plotly**: Creates responsive and interactive data visualizations
 
 ## ⚠️ Disclaimer
 
