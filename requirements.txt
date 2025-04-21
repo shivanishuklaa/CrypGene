@@ -7,5 +7,5 @@ python-dotenv
 pandas
 SpeechRecognition 
 gTTS 
-pyaudio
+
 plotly
