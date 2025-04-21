@@ -8,4 +8,4 @@ pandas
 SpeechRecognition 
 gTTS 
 plotly
-pyaudio
+
