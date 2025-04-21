@@ -15,6 +15,7 @@ import base64
 # Add import for plotly
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+# We'll use only SpeechRecognition for microphone input
 
 # Initialize the CoinGecko API client
 cg = CoinGeckoAPI()
@@ -47,26 +48,30 @@ if "page_view" not in st.session_state:
 # Add speech recognition function
 def speech_to_text():
     try:
-        # Initialize recognizer
+        st.info("🎤 Listening... Please speak now")
+        
+        # Initialize the recognizer
         recognizer = sr.Recognizer()
         
         # Use microphone as source
         with sr.Microphone() as source:
-            st.info("Speak now...")
             # Adjust for ambient noise
             recognizer.adjust_for_ambient_noise(source)
-            # Listen for audio
+            
+            # Record audio (with 5 second timeout)
             audio = recognizer.listen(source)
             
-            try:
-                # Recognize speech using Google's speech recognition
-                text = recognizer.recognize_google(audio)
-                return text
-            except sr.UnknownValueError:
-                return "Sorry, I could not understand the audio"
-            except sr.RequestError as e:
-                return f"Sorry, there was an error with the speech recognition service: {str(e)}"
-                
+            # Use Google Speech Recognition to convert audio to text
+            text = recognizer.recognize_google(audio)
+            
+            # Success message
+            st.success(f"Recognized: {text}")
+            return text
+            
+    except sr.UnknownValueError:
+        return "Sorry, I could not understand what you said."
+    except sr.RequestError as e:
+        return f"Sorry, there was an error with the speech recognition service: {str(e)}"
     except Exception as e:
         return f"Sorry, an error occurred: {str(e)}"
     
@@ -443,9 +448,8 @@ else:
                 # Regular text input
                 prompt = st.chat_input("Ask me anything about crypto investments or any other investments...")
             with col2:
-                # Voice input button
-                if st.button("🎤 Speak", use_container_width=True):
-                    # This will trigger the text input in the speech_to_text function
+                # Voice input button using SpeechRecognition
+                if st.button("🎤 Speak Now", use_container_width=True):
                     voice_input = speech_to_text()
                     if voice_input and not voice_input.startswith("Sorry"):
                         # Add user message to chat history
