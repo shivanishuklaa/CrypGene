@@ -14,7 +14,7 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
 
 ## 🔧 Requirements
 
-- Python 3.8+
+- Python 3.9+
 - Google API key for Gemini LLM
 - Internet connection for real-time cryptocurrency data
 
