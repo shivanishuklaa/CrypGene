@@ -7,8 +7,7 @@ import pandas as pd
 import numpy as np
 import time
 import copy
-# Add imports for speech functionality
-import speech_recognition as sr
+# Add import for text-to-speech functionality
 from gtts import gTTS
 from io import BytesIO
 import base64
@@ -45,38 +44,6 @@ if "selected_coin" not in st.session_state:
 if "page_view" not in st.session_state:
     st.session_state.page_view = "main"
 
-# Add speech recognition function
-def speech_to_text():
-    try:
-        st.info("🎤 Listening... Please speak now")
-        
-        # Initialize the recognizer
-        recognizer = sr.Recognizer()
-        
-        # Use microphone as source
-        with sr.Microphone() as source:
-            # Adjust for ambient noise
-            recognizer.adjust_for_ambient_noise(source)
-            
-            # Record audio (with 5 second timeout)
-            audio = recognizer.listen(source)
-            
-            # Use Google Speech Recognition to convert audio to text
-            text = recognizer.recognize_google(audio)
-            
-            # Success message
-            st.success(f"Recognized: {text}")
-            return text
-            
-    except sr.UnknownValueError:
-        return "Sorry, I could not understand what you said."
-    except sr.RequestError as e:
-        return f"Sorry, there was an error with the speech recognition service: {str(e)}"
-    except Exception as e:
-        return f"Sorry, an error occurred: {str(e)}"
-    
-    return None
-
 # Add text-to-speech function
 def text_to_speech(text):
     tts = gTTS(text=text, lang='en', slow=False)
@@ -85,7 +52,24 @@ def text_to_speech(text):
     fp.seek(0)
     audio_bytes = fp.read()
     b64 = base64.b64encode(audio_bytes).decode()
-    html = f'<audio autoplay="true" src="data:audio/mp3;base64,{b64}">'
+    
+    # Include a unique ID for the audio element so it can be controlled with JavaScript
+    audio_id = f"audio_{int(time.time())}"
+    
+    # Create HTML with audio player and a stop button
+    html = f'''
+    <audio id="{audio_id}" autoplay="true" src="data:audio/mp3;base64,{b64}">
+    <script>
+        // Register a function to stop the audio
+        window.stopAudio = function() {{
+            const audioElement = document.getElementById("{audio_id}");
+            if (audioElement) {{
+                audioElement.pause();
+                audioElement.currentTime = 0;
+            }}
+        }}
+    </script>
+    '''
     return html
 
 # Sidebar title
@@ -248,8 +232,6 @@ with col1:
         # Clear speech-related session state
         if "speech_html" in st.session_state:
             del st.session_state.speech_html
-        if "last_input_was_voice" in st.session_state:
-            del st.session_state.last_input_was_voice
         
         st.rerun()
 with col2:
@@ -443,34 +425,14 @@ else:
         
         # Add speech input option
         with input_container:
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                # Regular text input
-                prompt = st.chat_input("Ask me anything about crypto investments or any other investments...")
-            with col2:
-                # Voice input button using SpeechRecognition
-                if st.button("🎤 Speak Now", use_container_width=True):
-                    voice_input = speech_to_text()
-                    if voice_input and not voice_input.startswith("Sorry"):
-                        # Add user message to chat history
-                        st.session_state.messages.append({"role": "user", "content": voice_input})
-                        
-                        # Get response from the advisor agent
-                        response = st.session_state.crypto_advisor.get_response(voice_input)
-                        
-                        # Add assistant response to chat history
-                        st.session_state.messages.append({"role": "assistant", "content": response})
-                        
-                        # Convert response to speech
-                        speech_html = text_to_speech(response)
-                        st.session_state.speech_html = speech_html
-                        
-                        # Force a rerun to update the UI
-                        st.rerun()
-                    elif voice_input:
-                        st.error(voice_input)
+            # Regular text input - now using full width
+            prompt = st.chat_input("Ask me anything about crypto investments or any other investments...", key="chat_input")
             
             if prompt:
+                # Clear any currently playing speech
+                if "speech_html" in st.session_state:
+                    del st.session_state.speech_html
+                
                 # Add user message to chat history
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 
@@ -498,8 +460,23 @@ else:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
             
-            # Play speech if available
+            # Play speech if available and add a stop button
             if "speech_html" in st.session_state:
+                # Add a stop button to control audio playback
+                if st.button("🔇 Stop Audio", key="stop_audio"):
+                    # Use JavaScript to stop the audio
+                    st.components.v1.html('''
+                    <script>
+                        if (window.stopAudio) {
+                            window.stopAudio();
+                        }
+                    </script>
+                    ''', height=0)
+                    # Remove the speech HTML from session state
+                    del st.session_state.speech_html
+                    st.rerun()
+                
+                # Add the audio component
                 st.components.v1.html(st.session_state.speech_html, height=0)
 
 # Add disclaimer at the bottom of the application
