@@ -46,19 +46,31 @@ if "page_view" not in st.session_state:
 
 # Add speech recognition function
 def speech_to_text():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("Listening... Speak now")
-        audio = r.listen(source)
-        st.info("Processing speech...")
-    
     try:
-        text = r.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        return "Sorry, I couldn't understand what you said."
-    except sr.RequestError:
-        return "Sorry, speech recognition service is unavailable."
+        # Initialize recognizer
+        recognizer = sr.Recognizer()
+        
+        # Use microphone as source
+        with sr.Microphone() as source:
+            st.info("Speak now...")
+            # Adjust for ambient noise
+            recognizer.adjust_for_ambient_noise(source)
+            # Listen for audio
+            audio = recognizer.listen(source)
+            
+            try:
+                # Recognize speech using Google's speech recognition
+                text = recognizer.recognize_google(audio)
+                return text
+            except sr.UnknownValueError:
+                return "Sorry, I could not understand the audio"
+            except sr.RequestError as e:
+                return f"Sorry, there was an error with the speech recognition service: {str(e)}"
+                
+    except Exception as e:
+        return f"Sorry, an error occurred: {str(e)}"
+    
+    return None
 
 # Add text-to-speech function
 def text_to_speech(text):
@@ -433,6 +445,7 @@ else:
             with col2:
                 # Voice input button
                 if st.button("🎤 Speak", use_container_width=True):
+                    # This will trigger the text input in the speech_to_text function
                     voice_input = speech_to_text()
                     if voice_input and not voice_input.startswith("Sorry"):
                         # Add user message to chat history
@@ -450,7 +463,7 @@ else:
                         
                         # Force a rerun to update the UI
                         st.rerun()
-                    else:
+                    elif voice_input:
                         st.error(voice_input)
             
             if prompt:
