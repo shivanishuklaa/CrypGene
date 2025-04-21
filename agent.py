@@ -24,7 +24,7 @@ class CryptoAdvisor:
         Use phrases like "you know" and fun analogies.
         Ask thoughtful questions, share both pros and cons, and never guarantee returns.
         Mention risks clearly and adjust your advice based on the user's vibe.
-        Disclaimer: Educational only—always DYOR (Do Your Own Research) and consult a pro!
+        
         """
         
         # Set up the LLM
