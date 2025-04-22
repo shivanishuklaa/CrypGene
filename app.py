@@ -7,10 +7,6 @@ import pandas as pd
 import numpy as np
 import time
 import copy
-# Add import for text-to-speech functionality
-from gtts import gTTS
-from io import BytesIO
-import base64
 # Add import for plotly
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
@@ -43,34 +39,6 @@ if "selected_coin" not in st.session_state:
 # Add session state for page view (main or coin_detail)
 if "page_view" not in st.session_state:
     st.session_state.page_view = "main"
-
-# Add text-to-speech function
-def text_to_speech(text):
-    tts = gTTS(text=text, lang='en', slow=False)
-    fp = BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
-    audio_bytes = fp.read()
-    b64 = base64.b64encode(audio_bytes).decode()
-    
-    # Include a unique ID for the audio element so it can be controlled with JavaScript
-    audio_id = f"audio_{int(time.time())}"
-    
-    # Create HTML with audio player and a stop button
-    html = f'''
-    <audio id="{audio_id}" autoplay="true" src="data:audio/mp3;base64,{b64}">
-    <script>
-        // Register a function to stop the audio
-        window.stopAudio = function() {{
-            const audioElement = document.getElementById("{audio_id}");
-            if (audioElement) {{
-                audioElement.pause();
-                audioElement.currentTime = 0;
-            }}
-        }}
-    </script>
-    '''
-    return html
 
 # Sidebar title
 st.sidebar.title("🔥 Trending Cryptos")
@@ -228,10 +196,6 @@ with col1:
         
         # Reset the conversation memory in the advisor
         st.session_state.crypto_advisor.reset_conversation()
-        
-        # Clear speech-related session state
-        if "speech_html" in st.session_state:
-            del st.session_state.speech_html
         
         st.rerun()
 with col2:
@@ -415,7 +379,7 @@ else:
     # Tab 2: AI Advisor
     with tab2:
         # Chat section
-        st.header("Chat and Talk with CrypGene")
+        st.header("Chat with CrypGene")
         
         # Create a container for chat messages
         chat_container = st.container()
@@ -429,10 +393,6 @@ else:
             prompt = st.chat_input("Ask me anything about crypto investments or any other investments...", key="chat_input")
             
             if prompt:
-                # Clear any currently playing speech
-                if "speech_html" in st.session_state:
-                    del st.session_state.speech_html
-                
                 # Add user message to chat history
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 
@@ -441,10 +401,6 @@ else:
                 
                 # Add assistant response to chat history
                 st.session_state.messages.append({"role": "assistant", "content": response})
-                
-                # Convert response to speech
-                speech_html = text_to_speech(response)
-                st.session_state.speech_html = speech_html
                 
                 # Force a rerun to update the UI
                 st.rerun()
@@ -459,25 +415,6 @@ else:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
-            
-            # Play speech if available and add a stop button
-            if "speech_html" in st.session_state:
-                # Add a stop button to control audio playback
-                if st.button("🔇 Stop Audio", key="stop_audio"):
-                    # Use JavaScript to stop the audio
-                    st.components.v1.html('''
-                    <script>
-                        if (window.stopAudio) {
-                            window.stopAudio();
-                        }
-                    </script>
-                    ''', height=0)
-                    # Remove the speech HTML from session state
-                    del st.session_state.speech_html
-                    st.rerun()
-                
-                # Add the audio component
-                st.components.v1.html(st.session_state.speech_html, height=0)
 
 # Add disclaimer at the bottom of the application
 st.markdown("---")

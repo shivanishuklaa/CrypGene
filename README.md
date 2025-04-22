@@ -9,7 +9,6 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
 - **Real-time Market Data**: Access up-to-date information on cryptocurrency prices, market caps, trading volumes, and trends
 - **Trending Coins Tracker**: Monitor the top trending cryptocurrencies in a convenient sidebar display
 - **Price Charts**: Visualize cryptocurrency price movements with interactive 7-day price charts
-- **Text-to-Speech**: Listen to CrypGene's responses through audio playback
 - **Chat Management**: Easily start new conversations or clear chat history with intuitive controls
 
 ## 🔧 Requirements
@@ -32,7 +31,7 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
    ```
 
 3. Set up your API keys:
-   - update new key     ```
+   - update new Google API key in the .env file    
 
 4. Run the application:
    ```
@@ -60,13 +59,11 @@ CrypGene is an intelligent conversational AI agent that serves as your personal 
    - "What are the most promising altcoins to watch in 2024?"
    - "How should I diversify my crypto portfolio?"
    - "What factors are affecting the crypto market today?"
-- Get spoken responses through text-to-speech (with option to stop audio)
 
 ## 🛠️ Technical Details
 
 - **Google Gemini Model**: Utilizes Google's advanced Gemini 2.0 Flash model for natural language understanding and generation
 - **CoinGecko API**: Sources real-time and historical cryptocurrency data
-- **Streamlit Framework**: Powers the interactive web interface
 - **Plotly**: Creates responsive and interactive data visualizations
 
 ## ⚠️ Disclaimer

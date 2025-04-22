@@ -5,7 +5,5 @@ pycoingecko
 google-generativeai
 python-dotenv
 pandas
-SpeechRecognition 
-gTTS 
 plotly
 

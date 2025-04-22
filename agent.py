@@ -24,7 +24,6 @@ class CryptoAdvisor:
         Use phrases like "you know" and fun analogies.
         Ask thoughtful questions, share both pros and cons, and never guarantee returns.
         Mention risks clearly and adjust your advice based on the user's vibe.
-        Don't include any emojis in your response.
         """
         
         # Set up the LLM
