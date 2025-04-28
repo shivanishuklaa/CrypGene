@@ -330,48 +330,85 @@ else:
                     # Display the dataframe without selection functionality
                     st.dataframe(df, use_container_width=True, height=500)
                     
-                    # Note: Coin details can still be accessed through the trending coins sidebar
+                    # Create two columns for Top Gainers and Global Market Statistics in vertical parallel layout
+                    col_left, col_right = st.columns([1, 1])
+                    
+                    # Left column: Top 5 Gainers
+                    with col_left:
+                        st.subheader("🚀 Top 5 Gainers")
+                        
+                        # Sort the data by price change percentage (descending) and get top 5
+                        gainers_data = sorted(coins_data, key=lambda x: x.get('price_change_percentage_24h', 0) or 0, reverse=True)[:5]
+                        
+                        # Display each gainer in a more compact vertical layout
+                        for coin in gainers_data:
+                            # Extract data with safe defaults
+                            name = coin.get('name', 'Unknown')
+                            symbol = coin.get('symbol', '').upper()
+                            price = coin.get('current_price', 0)
+                            price_change = coin.get('price_change_percentage_24h', 0)
+                            coin_id = coin.get('id', '')
+                            market_cap_rank = coin.get('market_cap_rank', 'N/A')
+                            
+                            # Create a more compact card-like container for each coin
+                            with st.container():
+                                # Use smaller columns with adjusted ratios to reduce gap
+                                col1, col2, col3 = st.columns([0.4, 0.6, 1.0])
+                                with col1:
+                                    # Reduce image size and add negative margin to reduce gap
+                                    st.image(coin.get('image', ''), width=25)
+                                with col2:
+                                    # Inline price display with smaller font and reduced padding
+                                    st.write(f"<span style='font-size:0.9em; margin-left:-10px; display:block'>${price:,.2f} <span style='color:{'green' if price_change >= 0 else 'red'}'>{price_change:+.2f}%</span></span>", unsafe_allow_html=True)
+                                with col3:
+                                    # Make the coin name more compact
+                                    coin_name = f"**{name}**"
+                                    if st.button(coin_name, key=f"view_gainer_{coin_id}", use_container_width=True):
+                                        st.session_state.selected_coin = coin_id
+                                        st.session_state.page_view = "coin_detail"
+                                        st.rerun()
+                                # Thinner separator
+                                st.markdown("<hr style='margin:3px 0px; height:1px'>", unsafe_allow_html=True)
+                    
+                    # Right column: Global Market Statistics
+                    with col_right:
+                        st.subheader("🌎 Global Market Statistics")
+                        
+                        with st.spinner("Loading global market data..."):
+                            try:
+                                # Get global market data
+                                global_data = cg.get_global()
+                                
+                                # Extract statistics with robust error handling
+                                # Total Market Cap
+                                total_market_cap = 0
+                                if global_data and 'total_market_cap' in global_data:
+                                    market_cap_data = global_data['total_market_cap']
+                                    if isinstance(market_cap_data, dict) and 'usd' in market_cap_data:
+                                        total_market_cap = market_cap_data['usd']
+                                
+                                # Total Volume
+                                total_volume = 0
+                                if global_data and 'total_volume' in global_data:
+                                    volume_data = global_data['total_volume']
+                                    if isinstance(volume_data, dict) and 'usd' in volume_data:
+                                        total_volume = volume_data['usd']
+                                
+                                # Market Cap Change
+                                market_cap_change = 0
+                                if global_data and 'market_cap_change_percentage_24h_usd' in global_data:
+                                    market_cap_change = global_data['market_cap_change_percentage_24h_usd']
+                                
+                                # Display metrics in vertical layout
+                                st.metric("💰 Total Market Cap", f"${total_market_cap:,.0f}")
+                                st.metric("📊 24h Trading Volume", f"${total_volume:,.0f}")
+                                st.metric("📈 Market Cap Change (24h)", f"{market_cap_change:+.2f}%", delta_color="normal")
+
+                            except Exception as e:
+                                st.error(f"Could not fetch global market data: {str(e)}")
                     
             except Exception as e:
                 st.error(f"Error loading market data: {str(e)}")
-                
-        # Display global market statistics at the bottom with a more prominent design
-        st.subheader("🌎 Global Market Statistics")
-        
-        with st.spinner("Loading global market data..."):
-            try:
-                # Get global market data
-                global_data = cg.get_global()
-                
-                # Extract statistics with robust error handling
-                # Total Market Cap
-                total_market_cap = 0
-                if global_data and 'total_market_cap' in global_data:
-                    market_cap_data = global_data['total_market_cap']
-                    if isinstance(market_cap_data, dict) and 'usd' in market_cap_data:
-                        total_market_cap = market_cap_data['usd']
-                
-                # Total Volume
-                total_volume = 0
-                if global_data and 'total_volume' in global_data:
-                    volume_data = global_data['total_volume']
-                    if isinstance(volume_data, dict) and 'usd' in volume_data:
-                        total_volume = volume_data['usd']
-                
-                # Market Cap Change
-                market_cap_change = 0
-                if global_data and 'market_cap_change_percentage_24h_usd' in global_data:
-                    market_cap_change = global_data['market_cap_change_percentage_24h_usd']
-                                
-                # row - Market Cap, Volume and 24h market change
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("💰 Total Market Cap", f"${total_market_cap:,.0f}")
-                with col2:
-                    st.metric("📊 24h Trading Volume", f"${total_volume:,.0f}")
-                with col3:
-                    st.metric("📈 Market Cap Change (24h)", f"{market_cap_change:+.2f}%", 
-                             delta_color="normal")
                                                 
             except Exception as e:
                 st.error(f"Could not fetch global market data: {str(e)}")
