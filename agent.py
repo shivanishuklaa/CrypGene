@@ -1,12 +1,10 @@
 # Importing libraries required
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pycoingecko import CoinGeckoAPI
 import os
 import time
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -40,33 +38,20 @@ class CryptoAdvisor:
             max_output_tokens=150,  # Limit output size for faster generation
         )
         
-        # Setup conversation memory
-        self.memory = ConversationBufferMemory(return_messages=True)
+        # Setup conversation memory (list of messages)
+        self.messages = []
         
-        # Setup the conversation prompt
-        self.prompt = PromptTemplate(
-            input_variables=["history", "input"],
-            template=f"{self.system_message}\n\nConversation History:\n{{history}}\nHuman: {{input}}\nAI: "
-        )
-        
-        # Create the conversation chain
-        self.conversation = ConversationChain(
-            llm=self.llm,
-            memory=self.memory,
-            prompt=self.prompt,
-            verbose=False
-        )
+        # Setup the conversation prompt template
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", self.system_message),
+            MessagesPlaceholder(variable_name="history"),
+            ("human", "{input}")
+        ])
     
     # Add a new method to reset conversation memory
     def reset_conversation(self):
         """Reset the conversation memory to start a fresh chat"""
-        self.memory = ConversationBufferMemory(return_messages=True)
-        self.conversation = ConversationChain(
-            llm=self.llm,
-            memory=self.memory,
-            prompt=self.prompt,
-            verbose=False
-        )
+        self.messages = []
         
         # Return a flag indicating this is a fresh conversation
         # This will be used by the app to clear speech-related state
@@ -212,8 +197,21 @@ class CryptoAdvisor:
                 
                 enhanced_query = f"{query}{formatted_data}"
             
-            # Get response from conversation chain
-            response = self.conversation.predict(input=enhanced_query)
+            # Create the chain with prompt and LLM
+            chain = self.prompt | self.llm
+            
+            # Invoke the chain with conversation history (before adding current message)
+            response_obj = chain.invoke({
+                "history": self.messages,  # Previous conversation history
+                "input": enhanced_query
+            })
+            
+            # Extract response content
+            response = response_obj.content if hasattr(response_obj, 'content') else str(response_obj)
+            
+            # Add both user message and AI response to conversation history
+            self.messages.append(HumanMessage(content=enhanced_query))
+            self.messages.append(AIMessage(content=response))
             
             # Log performance metrics
             processing_time = time.time() - start_time
