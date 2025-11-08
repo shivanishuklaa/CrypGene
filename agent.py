@@ -36,6 +36,7 @@ class CryptoAdvisor:
             temperature=0.4,  # Lower temperature for faster, more deterministic responses
             google_api_key=os.getenv("GOOGLE_API_KEY"),
             max_output_tokens=150,  # Limit output size for faster generation
+            convert_system_message_to_human=True  # Convert system messages to human messages for Gemini compatibility
         )
         
         # Setup conversation memory (list of messages)
