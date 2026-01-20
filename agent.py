@@ -10,6 +10,25 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+def get_google_api_key():
+    """Get Google API key from Streamlit secrets or environment variable."""
+    # First try Streamlit secrets (for Streamlit Cloud deployment)
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
+            return st.secrets['GOOGLE_API_KEY']
+    except Exception:
+        pass
+    
+    # Fall back to environment variable (for local development)
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "GOOGLE_API_KEY not found. Please set it in Streamlit secrets "
+            "(for Streamlit Cloud) or as an environment variable (for local development)."
+        )
+    return api_key
+
 class CryptoAdvisor:
     def __init__(self):
         # Initialize CoinGecko API client
@@ -34,7 +53,7 @@ class CryptoAdvisor:
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash",
             temperature=0.4,  # Lower temperature for faster, more deterministic responses
-            google_api_key=os.getenv("GOOGLE_API_KEY"),
+            google_api_key=get_google_api_key(),
             max_output_tokens=150,  # Limit output size for faster generation
             convert_system_message_to_human=True  # Convert system messages to human messages for Gemini compatibility
         )
