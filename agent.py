@@ -51,7 +51,7 @@ class CryptoAdvisor:
         
         # Set up the LLM with optimized settings for faster responses
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             temperature=0.4,  # Lower temperature for faster, more deterministic responses
             google_api_key=os.getenv("GOOGLE_API_KEY"),
             max_output_tokens=150,  # Limit output size for faster generation
